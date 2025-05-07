@@ -1,0 +1,173 @@
+from embedding import addr_feature,context_feature, addrFeature_aggregate
+from collections import defaultdict
+import json
+import torch
+from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, Sampler
+from torch_geometric.data import Data,Dataset
+from torch_geometric.loader import DataLoader
+
+class Dict(Dataset):
+    def __init__(self,data_source:dict[list[Data]]):
+        '''
+        data_source: a dict of list of Data'''
+        self.data_source = data_source
+
+    def __getitem__(self, idx):
+        return idx
+
+    def __len__(self):
+        return sum(len(v) for v in self.data_source.values())
+    
+
+class DictBatchSampler(Sampler):
+    def __init__(self, data_source):
+        super().__init__(data_source)
+        self.data_source = data_source
+        self.keys = list(data_source.keys())
+
+    def __iter__(self):
+        for key in self.keys:
+            yield self.data_source[key]
+    
+    def __len__(self):
+        return len(self.keys)    
+        
+        
+def get_data_loader(tx_graphs:dict[list[Data]], method:str) -> tuple:
+    '''
+    Get the data loader for the tx graph
+    '''
+
+    match method:
+        case "random":
+            # Create a DataLoader for the graphs
+            datas = [data for datas in tx_graphs.values() for data in datas]
+            tx_Sampler = RandomSampler(datas)
+            loader = DataLoader(datas, sampler=tx_Sampler, batch_size=16)
+            # loader = DataLoader(tx_graphs, batch_size=32, shuffle=True)
+
+        case "sequential":
+            tx_Sampler = SequentialSampler(datas)
+            loader = DataLoader(datas, sampler=tx_Sampler, batch_size=64)
+
+        case "custom":
+            tx_Sampler = DictBatchSampler(tx_graphs)
+            loader = DataLoader(Dict(tx_graphs), batch_sampler=tx_Sampler, collate_fn=lambda x: x)
+
+    print(f"Created {method} DataLoader with {
+        sum(len(v) for v in tx_graphs.values())} graphs.")
+    return loader
+
+
+def get_tx_data(addr:str) -> list[dict]:
+    '''
+    return the list of all txs of the addr
+    '''
+    json_path_1 = f"F:/json_data/k=1/"
+    json_path_2 = f"F:/json_data/k=2/"
+    try:
+        with open(f"{json_path_2}{addr}.json", "r") as f:
+            js = json.load(f)
+        return js["data"][0]
+    except FileNotFoundError:
+        with open(f"{json_path_1}{addr}.json", "r") as f:
+            js = json.load(f)
+        return js["data"][0]
+
+
+def addr_count(txs:list[dict]) -> list[dict]:
+    '''
+    tag: "in" or "out"
+    input a txs list and a tag of in or out,
+    return a dict of the count of each address
+    '''
+    addr_cnt = [defaultdict(int) ,defaultdict(int)]
+    for tx in txs:
+        for _input in tx["inputs"]:
+            addr_cnt[0][_input["address"]] += 1
+    for tx in txs:
+        for output in tx["outputs"]:
+            addr_cnt[1][output["address"]] += 1
+    return addr_cnt
+
+def get_tx_graphs(addrs: list) -> dict[list[Data]]:
+    # Assume this is a list of addrs
+    # addrs = ["addr1", "addr2", "addr3"]
+
+    # Get tx data for each addr
+    txdata_of_addrs = defaultdict(list)
+    for addr in addrs:
+        txs:list[dict] = get_tx_data(addr)["txs"]
+        txdata_of_addrs[addr] = txs
+    
+    # Get addr count for each addr
+    addr_cnt_of_addrs = defaultdict(list)
+    for addr in addrs:
+        addr_cnt_of_addrs[addr] = addr_count(txdata_of_addrs[addr])
+    
+    # Build tx graph for each tx
+    tx_graphs:dict[list[Data]] = defaultdict(list)
+    for addr in addrs:
+        addr_graph:list[Data] = list()
+        for tx in txdata_of_addrs[addr]:
+            graph = build_tx_graph(tx, addr_cnt_of_addrs[addr])
+            addr_graph.append(graph)
+        # target y
+        for graph in addr_graph:
+            graph.y = torch.mean(
+                torch.stack([graph.x for graph in addr_graph]), dim=0)
+            # print(graph.y.shape) [8,4]
+        tx_graphs[addr] = addr_graph
+
+    return tx_graphs
+
+def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> Data:
+    '''
+    build a graph from a tx dict
+    return a graph
+    '''
+    in_addrFeature = defaultdict(list)
+    for _input in k1tx["inputs"]:
+        _addr = _input["address"]
+        txdata = get_tx_data(_addr)
+        in_addrFeature[_addr] = addr_feature(txdata) + [float(_input["value"])]
+
+    out_addrFeature = defaultdict(list)
+    for output in k1tx["outputs"]:
+        _addr = output["address"]
+        txdata = get_tx_data(_addr)
+        out_addrFeature[_addr] = addr_feature(txdata) + [float(output["value"])]
+
+    aggregated_in_addrFeature = addrFeature_aggregate(in_addrFeature, addr_cnt[0])
+    aggregated_out_addrFeature = addrFeature_aggregate(out_addrFeature, addr_cnt[1])
+    # 转换为tensor
+    aggregated_in_addrFeature = torch.tensor(aggregated_in_addrFeature, 
+                                             dtype=torch.float).view(-1,len(aggregated_in_addrFeature))
+    aggregated_out_addrFeature = torch.tensor(aggregated_out_addrFeature, 
+                                              dtype=torch.float).view(-1,len(aggregated_out_addrFeature))
+    x = torch.cat([aggregated_in_addrFeature, aggregated_out_addrFeature], dim=0)
+
+    # 生成边
+    edge:list[list] = [list([0]*4 + [1]*4 + [2]*4 + [3]*4),
+                        list([4, 5, 6, 7] * 4)]
+    edge = torch.LongTensor(edge)  # .t().contiguous()
+
+    # 边的特征与边的数量相同
+    contextFeature = context_feature(k1tx)
+    contextFeature = torch.tensor(contextFeature*edge.size(1), dtype=torch.float).view(edge.size(1),-1)
+
+    # 交易的可疑程度作为学习的标签,有点荒谬
+    # suspicious_score = abs(k1tx["inputCnt"] - k1tx["outputCnt"]) / (
+    #     k1tx["inputCnt"] + k1tx["outputCnt"])
+
+    assert x.size(0) == 8, f"{x.size(0)}"
+    assert edge.size(0) == 2, f"{edge.size(0)}"
+    # assert edge.size(1) == 16, "edge 的列数不是16!"
+    assert contextFeature.size(0) == edge.size(1), "每条边都要一个属性!"
+    graph = Data(
+        x=x,
+        edge_index=edge,
+        edge_attr=contextFeature,
+        # y=torch.tensor([suspicious_score], dtype=torch.float)
+    )
+    return graph
