@@ -57,24 +57,36 @@ class Trainer:
 
     def eval_model(self):
         print("Outputting the embedding sequence...")
-        # use the model to extract each tx's embedding, 
-        embedding_sequence:list[torch.Tensor] = list()
-        for batch in self.eval_dataloader:
-            embedding:torch.Tensor = self.model(batch).t()
-            assert embedding.size(0) == 4
-            assert embedding.size(1)%8 == 0
-            batch_size = embedding.size(1)//8
-            embedding_sequence.extend([embedding[:,i*batch_size:(i+1)*batch_size] 
-                                       for i in range(8)])
+        # 初始化存储序列的列表
+        sequences = [[[] for _ in range(4)] for _ in range(8)]  # 8 行 × 4 列
 
-        # save the embedding sequence to a file
+        for batch in self.eval_dataloader:
+            # 获取模型的输出
+            embedding: torch.Tensor = self.model(batch)  # [8 * batch_size, 4]
+            assert embedding.size(1) == 4, "列数必须为4"
+            assert embedding.size(0) % 8 == 0, "行数必须是8的倍数"
+
+            # 划分为 batch_size 个 [8, 4] 矩阵
+            batch_size = embedding.size(0) // 8
+            matrices = embedding.view(batch_size, 8, 4)  # [batch_size, 8, 4]
+
+            # 提取每个位置的序列
+            for i in range(8):  # 遍历每一行
+                for j in range(4):  # 遍历每一列
+                    sequences[i][j].append(matrices[:, i, j].tolist())
+
+        # 保存到文件
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        save_path = f"F:/model_save/embedding_{timestamp}.txt"
-        with open(save_path, "w", encoding="utf-8") as f:
-            for node in embedding_sequence:
-                for row in node:
-                    f.write(" ".join(map(str, row.tolist())) + "\n")
-        print(f"Embedding sequence saved to {save_path}")
+        save_dir = f"F:/model_save/embedding_{timestamp}"
+        os.makedirs(save_dir, exist_ok=True)
+
+        for i in range(8):
+            for j in range(4):
+                file_path = os.path.join(save_dir, f"{i}{j}.txt")
+                with open(file_path, "w", encoding="utf-8") as f:
+                    for batch_seq in sequences[i][j]:
+                        f.write(" ".join(map(str, batch_seq)) + "\n")
+                print(f"Saved sequence to {file_path}")
 
 
     def save(self, save_path: str):
