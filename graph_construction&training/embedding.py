@@ -48,19 +48,13 @@ def addr_feature(txdata_of_addr:dict) -> list:
     avg cost in tx, 历史交易中平均额度
     active period,  活跃周期(时间差/交易次数)
     '''
-    total_tx_count = 0
-    amount = 0
-    active_period = 0
-    total_tx_count += txdata_of_addr["txCount"]
-    amount += (float(txdata_of_addr["receive"]) - 
+    total_tx_count = txdata_of_addr["txCount"]
+    amount = (float(txdata_of_addr["receive"]) - 
                float(txdata_of_addr["spend"]))/txdata_of_addr["txCount"]
-    active_period += (txdata_of_addr["txs"][-1]["time"] - 
+    active_period = (txdata_of_addr["txs"][-1]["time"] - 
                         txdata_of_addr["txs"][0]["time"])/txdata_of_addr["txCount"]/3600 # 转换为小时
 
-    avg_txCount = total_tx_count / len(txdata_of_addr) if len(txdata_of_addr) > 0 else 0
-    avg_amount = amount / len(txdata_of_addr) if len(txdata_of_addr) > 0 else 0
-    avg_active_period = active_period / len(txdata_of_addr) if len(txdata_of_addr) > 0 else 0
-    return [avg_txCount, avg_amount, avg_active_period]
+    return [total_tx_count, amount, active_period]
 
 def addrFeature_aggregate(addrFeature:dict[list],addr_cnt:dict) -> list:
     '''
