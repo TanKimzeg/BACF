@@ -1,4 +1,4 @@
-from txGNN import TxGNN
+from .txGNN import TxGNN
 import torch
 import torch.nn as nn
 from torch_geometric.loader import DataLoader
@@ -11,8 +11,10 @@ import time,os
 #     graphs.append(build_tx_graph(tx))
 # loader = DataLoader(graphs, batch_size=32, shuffle=True)
 class Trainer:
-    def __init__(self,model:TxGNN,train_dataloader:DataLoader,
+    def __init__(self,arg,label:str,model:TxGNN,train_dataloader:DataLoader,
                  eval_dataloader:DataLoader):
+        self.arg = arg
+        self.label = label
         self.model = model
         self.train_dataloader = train_dataloader
         self.eval_dataloader = eval_dataloader
@@ -55,7 +57,7 @@ class Trainer:
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss / len(self.train_dataloader)}")
         return self.model
 
-    def eval_model(self):
+    def impl(self):
         print("Outputting the embedding sequence...")
         # 初始化存储序列的列表
         sequences = [[[] for _ in range(4)] for _ in range(8)]  # 8 行 × 4 列
@@ -76,8 +78,8 @@ class Trainer:
                     sequences[i][j].append(matrices[:, i, j].tolist())
 
         # 保存到文件
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        save_dir = f"F:/model_save/embedding_{timestamp}"
+        save_dir = f"{self.arg.output}{self.label}/"
+        # TODO: 这里的路径需要改为标签名
         os.makedirs(save_dir, exist_ok=True)
 
         for i in range(8):

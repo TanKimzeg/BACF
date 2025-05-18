@@ -1,6 +1,8 @@
-from embedding import addr_feature,context_feature, addrFeature_aggregate
+from . import config
+from .embedding import addr_feature,context_feature, addrFeature_aggregate
 from collections import defaultdict
 import json
+import os
 import torch
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, Sampler
 from torch_geometric.data import Data,Dataset
@@ -63,8 +65,8 @@ def get_tx_data(addr:str) -> list[dict]:
     '''
     return the list of all txs of the addr
     '''
-    json_path_1 = f"F:/json_data/k=1/"
-    json_path_2 = f"F:/json_data/k=2/"
+    json_path_1 = os.path.join(config.args.addrdir,config.label)+f"/k=1/"
+    json_path_2 = os.path.join(config.args.addrdir,config.label)+f"/k=2/"
     try:
         with open(f"{json_path_2}{addr}.json", "r") as f:
             js = json.load(f)
@@ -117,6 +119,7 @@ def get_tx_graphs(addrs: list) -> dict[list[Data]]:
             graph.y = torch.mean(
                 torch.stack([graph.x for graph in addr_graph]), dim=0)
             # print(graph.y.shape) [8,4]
+            # print(graph.y.tolist())
         tx_graphs[addr] = addr_graph
 
     return tx_graphs

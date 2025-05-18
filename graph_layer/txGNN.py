@@ -4,12 +4,12 @@ from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import GCNConv,MessagePassing
 import torch_geometric.nn.functional as F
-from utils import build_tx_graph
+from .utils import build_tx_graph
 
 #    自定义GNN层
 class EdgeSAGEConv(MessagePassing):
     def __init__(self, in_channels, out_channels, edge_channels):
-        super(EdgeSAGEConv, self).__init__(aggr='mean')  # "Add" aggregation.
+        super(EdgeSAGEConv, self).__init__(aggr='add')  # "Add" aggregation.
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.edge_channels = edge_channels

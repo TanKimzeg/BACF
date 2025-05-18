@@ -51,8 +51,8 @@ def addr_feature(txdata_of_addr:dict) -> list:
     total_tx_count = txdata_of_addr["txCount"]
     amount = (float(txdata_of_addr["receive"]) - 
                float(txdata_of_addr["spend"]))/txdata_of_addr["txCount"]
-    active_period = (txdata_of_addr["txs"][-1]["time"] - 
-                        txdata_of_addr["txs"][0]["time"])/txdata_of_addr["txCount"]/3600 # 转换为小时
+    active_period = (txdata_of_addr["txs"][0]["time"] - 
+                        txdata_of_addr["txs"][-1]["time"])/txdata_of_addr["txCount"]/3600 # 转换为小时
 
     return [total_tx_count, amount, active_period]
 
