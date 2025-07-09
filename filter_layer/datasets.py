@@ -71,7 +71,12 @@ class FMLPRecDataset(Dataset):
 def neg_sample(item_set, item_size):  # 前闭后闭
     if item_size > 1:
         item = random.randint(1, item_size-1)
-        while item in item_set:
+        max_loop = 100
+        while item in item_set and max_loop > 0:
+            item = random.randint(1, item_size-1)
+            max_loop -= 1
+        if max_loop == 0:
+            print("Warning: neg_sample failed")
             item = random.randint(1, item_size-1)
     else:
         item = 1

@@ -1,5 +1,6 @@
 from . import config
 from .embedding import addr_feature,context_feature, addrFeature_aggregate
+from .feature_expension import FeatureExpansion
 from collections import defaultdict
 import json
 import os
@@ -92,7 +93,7 @@ def addr_count(txs:list[dict]) -> list[dict]:
             addr_cnt[1][output["address"]] += 1
     return addr_cnt
 
-def get_tx_graphs(addrs: list) -> dict[list[Data]]:
+def get_tx_graphs(addrs: list) -> dict[str, list[torch.Tensor]]:
     # Assume this is a list of addrs
     # addrs = ["addr1", "addr2", "addr3"]
 
@@ -108,23 +109,17 @@ def get_tx_graphs(addrs: list) -> dict[list[Data]]:
         addr_cnt_of_addrs[addr] = addr_count(txdata_of_addrs[addr])
     
     # Build tx graph for each tx
-    tx_graphs:dict[list[Data]] = defaultdict(list)
+    tx_graphs:dict[list[torch.Tensor]] = defaultdict(list)
     for addr in addrs:
-        addr_graph:list[Data] = list()
+        addr_graph:list[torch.Tensor] = list()
         for tx in txdata_of_addrs[addr]:
             graph = build_tx_graph(tx, addr_cnt_of_addrs[addr])
             addr_graph.append(graph)
-        # target y
-        for graph in addr_graph:
-            graph.y = torch.mean(
-                torch.stack([graph.x for graph in addr_graph]), dim=0)
-            # print(graph.y.shape) [8,4]
-            # print(graph.y.tolist())
-        tx_graphs[addr] = addr_graph
-
+        tx_graphs[addr] = addr_graph.copy()
+    
     return tx_graphs
 
-def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> Data:
+def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> torch.Tensor:
     '''
     build a graph from a tx dict
     return a graph
@@ -145,32 +140,26 @@ def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> Data:
     aggregated_out_addrFeature = addrFeature_aggregate(out_addrFeature, addr_cnt[1])
     # 转换为tensor
     aggregated_in_addrFeature = torch.tensor(aggregated_in_addrFeature, 
-                                             dtype=torch.float).view(-1,len(aggregated_in_addrFeature))
+                                             dtype=torch.float).view(len(aggregated_in_addrFeature),-1)
     aggregated_out_addrFeature = torch.tensor(aggregated_out_addrFeature, 
-                                              dtype=torch.float).view(-1,len(aggregated_out_addrFeature))
+                                              dtype=torch.float).view(len(aggregated_out_addrFeature), -1)
+    # contextFeature = context_feature(k1tx)
     x = torch.cat([aggregated_in_addrFeature, aggregated_out_addrFeature], dim=0)
+    x = torch.nan_to_num(x, nan=0.0)  # 将 NaN 替换为 0
 
     # 生成边
-    edge:list[list] = [list([0]*4 + [1]*4 + [2]*4 + [3]*4),
-                        list([4, 5, 6, 7] * 4)]
+    edge = [list([0]*4 + [1]*4 + [2]*4 + [3]*4), 
+            list([4, 5, 6, 7]*4)]
     edge = torch.LongTensor(edge)  # .t().contiguous()
 
-    # 边的特征与边的数量相同
-    contextFeature = context_feature(k1tx)
-    contextFeature = torch.tensor(contextFeature*edge.size(1), dtype=torch.float).view(edge.size(1),-1)
 
-    # 交易的可疑程度作为学习的标签,有点荒谬
-    # suspicious_score = abs(k1tx["inputCnt"] - k1tx["outputCnt"]) / (
-    #     k1tx["inputCnt"] + k1tx["outputCnt"])
-
-    assert x.size(0) == 8, f"{x.size(0)}"
-    assert edge.size(0) == 2, f"{edge.size(0)}"
+    assert x.size(0) == 8, f"输入节点\输出节点共{x.size(0)}"
+    assert edge.size(0) == 2, f"edge.size(0) = {edge.size(0)}"
     # assert edge.size(1) == 16, "edge 的列数不是16!"
-    assert contextFeature.size(0) == edge.size(1), "每条边都要一个属性!"
+    # assert contextFeature.size(0) == edge.size(1), "每条边都要一个属性!"
     graph = Data(
         x=x,
         edge_index=edge,
-        edge_attr=contextFeature,
-        # y=torch.tensor([suspicious_score], dtype=torch.float)
     )
+    graph = FeatureExpansion(ak=3).transform(graph)
     return graph

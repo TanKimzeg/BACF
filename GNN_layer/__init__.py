@@ -1,4 +1,4 @@
-from graph_layer.main import train2impl, load2impl
+from GNN_layer.main import train2impl, load2impl
 
 
 

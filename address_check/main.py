@@ -9,6 +9,10 @@ def check_addresses(arg,label:str):
     labeled_addr_path = f"{arg.addrdir}/{label}/k=1/"
     neighbor_addr_path = f"{arg.addrdir}/{label}/k=2/"
     log_dir = os.path.join(arg.logdir,label)
+    ready_addr_path = os.path.join(log_dir, "ready_addr.txt")
+    if os.path.exists(ready_addr_path):
+        print(f"Ready addresses already exist at {ready_addr_path}.")
+        return
 
     # 
     neighbor_addr_list = set(os.path.splitext(file)[0] for file in os.listdir(neighbor_addr_path))

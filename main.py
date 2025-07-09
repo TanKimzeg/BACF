@@ -1,17 +1,19 @@
 import argparse
+import os
 from address_check import check_addresses
-import graph_layer
+import GNN_layer
 import filter_layer
 import classifier
-import graph_layer.config
+import GNN_layer.config
+import GFN_layer
 
 def main():
-    main_parser = argparse.ArgumentParser()
-    main_parser.add_argument('--addrdir',default=f'F:/json_data/',type=str)
-    main_parser.add_argument('--logdir',default=f'F:/log/',type=str)
-    main_parser.add_argument('--modelsave',default=f'F:/model_save/',type=str)
-    main_parser.add_argument('--output',default=f'F:/output/',type=str)
-    main_args:argparse.Namespace = main_parser.parse_args()
+    graph_layer_parser = argparse.ArgumentParser()
+    graph_layer_parser.add_argument('--addrdir',default=f'F:/json_data/',type=str)
+    graph_layer_parser.add_argument('--logdir',default=f'F:/log/',type=str)
+    graph_layer_parser.add_argument('--modelsave',default=f'F:/model_save/',type=str)
+    graph_layer_parser.add_argument('--output',default=f'F:/output/',type=str)
+    graph_layer_args:argparse.Namespace = graph_layer_parser.parse_args()
 
     FMLP_parser = argparse.ArgumentParser()
     FMLP_parser.add_argument("--data_dir", default="./data/", type=str)
@@ -53,15 +55,18 @@ def main():
         'gambling'
     ]
     for label in labels:
-        check_addresses(main_args,label)
-        graph_layer.config.args = main_args
-        graph_layer.config.label = label
-        graph_layer.train2impl(main_args,label)
-        filter_layer.generate_sample(main_args,label)
-        FMLP_args.data_dir = main_args.output + label + '/'
-        FMLP_args.output_dir = main_args.output + label + '/'
+        check_addresses(graph_layer_args,label)
+        # GNN_layer.config.args = graph_layer_args
+        # GNN_layer.config.label = label
+        # GNN_layer.train2impl(graph_layer_args,label)
+        GFN_layer.config.args = graph_layer_args
+        GFN_layer.config.label = label
+        GFN_layer.gfn_process(graph_layer_args, label)
+        filter_layer.generate_sample(graph_layer_args,label)
+        FMLP_args.data_dir = graph_layer_args.output + label + '/'
+        FMLP_args.output_dir = graph_layer_args.output + label + '/'
         for node in range(8):
-            for feature in range(4):
+            for feature in range(38):
                 print(f"Dealing {node}{feature}...")
                 FMLP_args.data_name = f"{node}{feature}"
                 try: # TODO:值全为0的文件会抛出错误,修改neg_sample
@@ -72,7 +77,7 @@ def main():
     
     for label in labels:
         # 正类与负类，分别使用LR训练
-        classifier.LR(main_args,label,labels)
+        classifier.LR(graph_layer_args,label,labels)
 
 # if __name__ == '__main__':
 main()
