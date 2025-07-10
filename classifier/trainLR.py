@@ -108,7 +108,7 @@ def main(args,label:str,labels:list[str],dim:tuple[int, int]):
                 print(f"Training completed for node {node}, feature {feature}.")
                 # 保存模型参数到modelsave文件夹下
                 torch.save(model.state_dict(), os.path.join(args.modelsave,f"{node}{feature}_model.pth"))
-                print(f"Model saved to {args.modelsave}/{node}{feature}_model.pth")
+                print(f"Model saved to {args.modelsave}/LR{node}{feature}_model.pth")
             except FileNotFoundError:
                 continue
     print("All models trained and saved.")

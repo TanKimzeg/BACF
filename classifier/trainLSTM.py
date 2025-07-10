@@ -62,14 +62,14 @@ def train_by_file(model: LSTMClassifier, train_loader: DataLoader, test_loader: 
         print(f'Accuracy: {accuracy:.4f}')
 
 
-def main(args, label: str, labels: list[str]):
+def main(args, label: str, labels: list[str],dim: tuple[int, int]):
     input_dim = 64  # 输入特征维度
     hidden_dim = 128  # LSTM隐藏层维度
     output_dim = 2  # 输出类别数
     num_layers = 2  # LSTM层数
 
-    for node in range(8):
-        for feature in range(38):
+    for node in range(dim[0]):
+        for feature in range(dim[1]):
             try:
                 X = []
                 y = []
@@ -103,7 +103,7 @@ def main(args, label: str, labels: list[str]):
                 print(f"Training completed for node {node}, feature {feature}.")
                 # 保存模型参数到modelsave文件夹下
                 torch.save(model.state_dict(), os.path.join(args.modelsave, f"{node}{feature}_model.pth"))
-                print(f"Model saved to {args.modelsave}/{node}{feature}_model.pth")
+                print(f"Model saved to {args.modelsave}/LSTM{node}{feature}_model.pth")
             except FileNotFoundError:
                 continue
     print("All models trained and saved.")

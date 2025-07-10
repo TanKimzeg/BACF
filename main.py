@@ -78,6 +78,7 @@ def main():
     for label in labels:
         # 正类与负类，分别使用LR训练
         classifier.LR(graph_layer_args,label,labels,dim=(dim_0, dim_1))
+        classifier.LSTM(graph_layer_args,label,labels,dim=(dim_0, dim_1))
 
 if __name__ == '__main__':
     main()
