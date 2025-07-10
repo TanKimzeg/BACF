@@ -154,6 +154,7 @@ def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> torch.Tensor:
 
 
     assert x.size(0) == 8, f"输入节点\输出节点共{x.size(0)}"
+    assert x.size(1) == 37, f"每个节点有{x.size(1)}个属性"
     assert edge.size(0) == 2, f"edge.size(0) = {edge.size(0)}"
     # assert edge.size(1) == 16, "edge 的列数不是16!"
     # assert contextFeature.size(0) == edge.size(1), "每条边都要一个属性!"

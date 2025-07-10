@@ -3,7 +3,7 @@ import torch
 from .utils import get_tx_graphs
 import argparse
 
-def main(args: argparse.Namespace, label: str):
+def main(args: argparse.Namespace, label: str) -> tuple[int, int]:
     addr_list = []
     output_dir = os.path.join(args.output, label)
     if not os.path.exists(output_dir):
@@ -52,3 +52,5 @@ def main(args: argparse.Namespace, label: str):
         handler.close()
 
     print(f"Feature values saved to {output_dir} directory.")    
+
+    return dim_0, dim_1

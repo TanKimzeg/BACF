@@ -61,12 +61,12 @@ def main():
         # GNN_layer.train2impl(graph_layer_args,label)
         GFN_layer.config.args = graph_layer_args
         GFN_layer.config.label = label
-        GFN_layer.gfn_process(graph_layer_args, label)
+        dim_0, dim_1 = GFN_layer.gfn_process(graph_layer_args, label)
         filter_layer.generate_sample(graph_layer_args,label)
         FMLP_args.data_dir = graph_layer_args.output + label + '/'
         FMLP_args.output_dir = graph_layer_args.output + label + '/'
-        for node in range(8):
-            for feature in range(38):
+        for node in range(dim_0):
+            for feature in range(dim_1):
                 print(f"Dealing {node}{feature}...")
                 FMLP_args.data_name = f"{node}{feature}"
                 try: # TODO:值全为0的文件会抛出错误,修改neg_sample
@@ -77,8 +77,8 @@ def main():
     
     for label in labels:
         # 正类与负类，分别使用LR训练
-        classifier.LR(graph_layer_args,label,labels)
+        classifier.LR(graph_layer_args,label,labels,dim=(dim_0, dim_1))
 
-# if __name__ == '__main__':
-main()
+if __name__ == '__main__':
+    main()
     

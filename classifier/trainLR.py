@@ -62,7 +62,7 @@ def train_by_file(model:LogisticRegressionModel,
         print(f'Accuracy: {accuracy:.4f}')
 
 
-def main(args,label:str,labels:list[str]):
+def main(args,label:str,labels:list[str],dim:tuple[int, int]):
     '''
     对于labels下的所有*_filter.txt文件进行训练
     其中,label:正类,其他labels为负类
@@ -72,8 +72,8 @@ def main(args,label:str,labels:list[str]):
     '''
     input_dim = 64  # 输入特征维度，由args传入与FMLP的output_dim保持一致
     output_dim = 2  # 输出类别数（对于二分类，输出维度为2）
-    for node in range(8):
-        for feature in range(38):
+    for node in range(dim[0]):
+        for feature in range(dim[1]):
             try:
                 X = []
                 y = []
