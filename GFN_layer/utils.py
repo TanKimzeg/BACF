@@ -4,6 +4,7 @@ from .feature_expension import FeatureExpansion
 from collections import defaultdict
 import json
 import os
+from tqdm import tqdm 
 import torch
 from torch.utils.data import DataLoader, SequentialSampler, RandomSampler, Sampler
 from torch_geometric.data import Data,Dataset
@@ -87,10 +88,12 @@ def addr_count(txs:list[dict]) -> list[dict]:
     addr_cnt = [defaultdict(int) ,defaultdict(int)]
     for tx in txs:
         for _input in tx["inputs"]:
-            addr_cnt[0][_input["address"]] += 1
+            if "address" in _input:
+                addr_cnt[0][_input["address"]] += 1
     for tx in txs:
         for output in tx["outputs"]:
-            addr_cnt[1][output["address"]] += 1
+            if "address" in output:
+                addr_cnt[1][output["address"]] += 1
     return addr_cnt
 
 def get_tx_graphs(addrs: list) -> dict[str, list[torch.Tensor]]:
@@ -110,7 +113,8 @@ def get_tx_graphs(addrs: list) -> dict[str, list[torch.Tensor]]:
     
     # Build tx graph for each tx
     tx_graphs:dict[list[torch.Tensor]] = defaultdict(list)
-    for addr in addrs:
+    for addr in tqdm(addrs, desc="Generating GFN features", 
+                     unit="addr", dynamic_ncols=True):
         addr_graph:list[torch.Tensor] = list()
         for tx in txdata_of_addrs[addr]:
             graph = build_tx_graph(tx, addr_cnt_of_addrs[addr])
@@ -126,15 +130,17 @@ def build_tx_graph(k1tx:dict,addr_cnt:list[dict]) -> torch.Tensor:
     '''
     in_addrFeature = defaultdict(list)
     for _input in k1tx["inputs"]:
-        _addr = _input["address"]
-        txdata = get_tx_data(_addr)
-        in_addrFeature[_addr] = addr_feature(txdata) + [float(_input["value"])]
+        if "address" in _input:
+            _addr = _input["address"]
+            txdata = get_tx_data(_addr)
+            in_addrFeature[_addr] = addr_feature(txdata) + [float(_input["value"])]
 
     out_addrFeature = defaultdict(list)
     for output in k1tx["outputs"]:
-        _addr = output["address"]
-        txdata = get_tx_data(_addr)
-        out_addrFeature[_addr] = addr_feature(txdata) + [float(output["value"])]
+        if "address" in output:
+            _addr = output["address"]
+            txdata = get_tx_data(_addr)
+            out_addrFeature[_addr] = addr_feature(txdata) + [float(output["value"])]
 
     aggregated_in_addrFeature = addrFeature_aggregate(in_addrFeature, addr_cnt[0])
     aggregated_out_addrFeature = addrFeature_aggregate(out_addrFeature, addr_cnt[1])

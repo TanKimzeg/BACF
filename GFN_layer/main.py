@@ -1,9 +1,10 @@
 import os
 import torch
+from tqdm import tqdm
 from .utils import get_tx_graphs
-import argparse
+from argparse import Namespace
 
-def main(args: argparse.Namespace, label: str) -> tuple[int, int]:
+def main(args: Namespace, label: str) -> tuple[int, int]:
     addr_list = []
     output_dir = os.path.join(args.output, label)
     if not os.path.exists(output_dir):
@@ -15,10 +16,6 @@ def main(args: argparse.Namespace, label: str) -> tuple[int, int]:
         for line in f:
             addr = line.strip()
             addr_list.append(addr)
-
-    ##################################################
-    # addr_list = addr_list[:10]  # 只取前10个地址进行测试
-    ##################################################
 
     print(f"Loaded {len(addr_list)} addresses from {read_addr_path}.")
 
@@ -38,8 +35,9 @@ def main(args: argparse.Namespace, label: str) -> tuple[int, int]:
             file_path = os.path.join(output_dir, f"{i}{j}.txt")
             file_handler[(i,j)] = open(file_path, "w", encoding="utf-8")
     
-    for addr, graph_list in tx_graphs.items():
-        print(f"Processing address: {addr}, number of graphs: {len(graph_list)}") 
+    for addr, graph_list in tqdm(tx_graphs.items(),
+            desc="Saving GFN features", unit="addr", dynamic_ncols=True, leave=True):
+        tqdm.write(f"Saving address: {addr}, number of graphs: {len(graph_list)}") 
         stacked_graph = torch.stack(graph_list, dim=0)  # [batch_size, node_num, feature_dim]
         assert stacked_graph.size(1) == dim_0
         assert stacked_graph.size(2) == dim_1
