@@ -21,7 +21,7 @@ class Consts:
 
     file_root_dir = f"F:/json_data/"
     log_dir = f"F:/log/"
-    dataset_path = f"E:/modelproject/BTCanalysis/BABD-13.csv"
+    dataset_path = f"F:/BABD-13.csv"
 
     class labels(Enum):
         Blackmail = 0
