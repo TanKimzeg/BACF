@@ -19,7 +19,10 @@ class FMLPRecDataset(Dataset):
                     self.user_seq.append(input_ids[:i + 1])
         elif data_type=='valid':
             for sequence in user_seq:
-                self.user_seq.append(sequence[:-1])
+                if len(sequence) == 1: 
+                    self.user_seq.append([0]) # 采用前导0填充
+                else:
+                    self.user_seq.append(sequence[:-1])
         else:
             self.user_seq = user_seq
 

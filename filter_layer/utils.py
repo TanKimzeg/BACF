@@ -13,15 +13,7 @@ from scipy.sparse import csr_matrix
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from .datasets import FMLPRecDataset
 
-sequential_data_list = [
-    '00','01','02','03',
-    '10','11','12','13',
-    '20','21','22','23',
-    '30','31','32','33',
-    '40','41','42','43',
-    '50','51','52','53',
-    '60','61','62','63',
-    '70','70','72','73' ]
+sequential_data_list = ['Beauty','Sports_and_Outdoors','Toys_and_Games','Yelp' ]
 session_based_data_list = ['nowplaying','retailrocket','tmall','yoochoose']
 
 def set_seed(seed):
@@ -141,12 +133,12 @@ def generate_rating_matrix_test(user_seq, num_users, num_items):
 
 def get_rating_matrix(data_name, seq_dic, max_item):
     num_items = max_item + 1
-    if data_name in sequential_data_list:
-        valid_rating_matrix = generate_rating_matrix_valid(seq_dic['user_seq'], seq_dic['num_users'], num_items)
-        test_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq'], seq_dic['num_users'], num_items)
-    elif data_name in session_based_data_list:
-        valid_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq_eval'], seq_dic['num_users_eval'], num_items)
-        test_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq_test'], seq_dic['num_users_test'], num_items)
+    # if data_name in sequential_data_list:
+    valid_rating_matrix = generate_rating_matrix_valid(seq_dic['user_seq'], seq_dic['num_users'], num_items)
+    test_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq'], seq_dic['num_users'], num_items)
+    # elif data_name in session_based_data_list:
+    #     valid_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq_eval'], seq_dic['num_users_eval'], num_items)
+    #     test_rating_matrix = generate_rating_matrix_test(seq_dic['user_seq_test'], seq_dic['num_users_test'], num_items)
     return valid_rating_matrix, test_rating_matrix
 
 def get_user_seqs_and_max_item(data_file):
@@ -246,58 +238,58 @@ def idcg_k(k):
 
 def get_seq_dic(args):
 
-    if args.data_name in sequential_data_list:
-        args.data_file = args.data_dir + args.data_name + '.txt'
-        args.sample_file = args.data_dir + args.data_name + '_sample.txt'
-        user_seq, max_item, num_users, sample_seq = \
-            get_user_seqs_and_sample(args.data_file, args.sample_file)
-        seq_dic = {'user_seq':user_seq, 'num_users':num_users, 'sample_seq':sample_seq}
+    # if args.data_name in sequential_data_list:
+    args.data_file = args.data_dir + args.data_name + '.txt'
+    args.sample_file = args.data_dir + args.data_name + '_sample.txt'
+    user_seq, max_item, num_users, sample_seq = \
+        get_user_seqs_and_sample(args.data_file, args.sample_file)
+    seq_dic = {'user_seq':user_seq, 'num_users':num_users, 'sample_seq':sample_seq}
         
-    elif args.data_name in session_based_data_list:
-        args.data_file = args.data_dir + args.data_name +'/'+ args.data_name + '.train.inter'
-        args.data_file_eval = args.data_dir + args.data_name +'/'+ args.data_name + '.valid.inter'
-        args.data_file_test = args.data_dir + args.data_name +'/'+ args.data_name + '.test.inter'
-        args.sample_file_eval = args.data_dir + args.data_name +'/'+ args.data_name + '_valid_sample.txt'
-        args.sample_file_test = args.data_dir + args.data_name +'/'+ args.data_name + '_test_sample.txt'
+    # elif args.data_name in session_based_data_list:
+    #     args.data_file = args.data_dir + args.data_name +'/'+ args.data_name + '.train.inter'
+    #     args.data_file_eval = args.data_dir + args.data_name +'/'+ args.data_name + '.valid.inter'
+    #     args.data_file_test = args.data_dir + args.data_name +'/'+ args.data_name + '.test.inter'
+    #     args.sample_file_eval = args.data_dir + args.data_name +'/'+ args.data_name + '_valid_sample.txt'
+    #     args.sample_file_test = args.data_dir + args.data_name +'/'+ args.data_name + '_test_sample.txt'
 
-        user_seq, max_item = \
-            get_user_seqs_and_max_item(args.data_file)
-        user_seq_eval, num_users_eval, sample_seq_eval = \
-            get_user_seqs_and_sample4session_based(args.data_file_eval, args.sample_file_eval)
-        user_seq_test, num_users_test, sample_seq_test = \
-            get_user_seqs_and_sample4session_based(args.data_file_test, args.sample_file_test)
-        seq_dic = {'user_seq':user_seq, 
-                   'user_seq_eval':user_seq_eval, 'num_users_eval':num_users_eval, 'sample_seq_eval':sample_seq_eval,
-                   'user_seq_test':user_seq_test, 'num_users_test':num_users_test, 'sample_seq_test':sample_seq_test}
+    #     user_seq, max_item = \
+    #         get_user_seqs_and_max_item(args.data_file)
+    #     user_seq_eval, num_users_eval, sample_seq_eval = \
+    #         get_user_seqs_and_sample4session_based(args.data_file_eval, args.sample_file_eval)
+    #     user_seq_test, num_users_test, sample_seq_test = \
+    #         get_user_seqs_and_sample4session_based(args.data_file_test, args.sample_file_test)
+    #     seq_dic = {'user_seq':user_seq, 
+    #                'user_seq_eval':user_seq_eval, 'num_users_eval':num_users_eval, 'sample_seq_eval':sample_seq_eval,
+    #                'user_seq_test':user_seq_test, 'num_users_test':num_users_test, 'sample_seq_test':sample_seq_test}
 
     return seq_dic, max_item
 
 def get_dataloder(args,seq_dic):
 
-    if args.data_name in sequential_data_list:
-        train_dataset = FMLPRecDataset(args, seq_dic['user_seq'], data_type='train')
-        train_sampler = RandomSampler(train_dataset)
-        train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.batch_size)
+    # if args.data_name in sequential_data_list:
+    train_dataset = FMLPRecDataset(args, seq_dic['user_seq'], data_type='train')
+    train_sampler = RandomSampler(train_dataset)
+    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.batch_size)
 
-        eval_dataset = FMLPRecDataset(args, seq_dic['user_seq'], test_neg_items=seq_dic['sample_seq'], data_type='valid')
-        eval_sampler = SequentialSampler(eval_dataset)
-        eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.batch_size)
+    eval_dataset = FMLPRecDataset(args, seq_dic['user_seq'], test_neg_items=seq_dic['sample_seq'], data_type='valid')
+    eval_sampler = SequentialSampler(eval_dataset)
+    eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.batch_size)
 
-        test_dataset = FMLPRecDataset(args, seq_dic['user_seq'], test_neg_items=seq_dic['sample_seq'], data_type='test')
-        test_sampler = SequentialSampler(test_dataset)
-        test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=args.batch_size)
+    test_dataset = FMLPRecDataset(args, seq_dic['user_seq'], test_neg_items=seq_dic['sample_seq'], data_type='test')
+    test_sampler = SequentialSampler(test_dataset)
+    test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=args.batch_size)
 
-    elif args.data_name in session_based_data_list:
-        train_dataset = FMLPRecDataset(args, seq_dic['user_seq'], data_type='session')
-        train_sampler = RandomSampler(train_dataset)
-        train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.batch_size)
+    # elif args.data_name in session_based_data_list:
+    #     train_dataset = FMLPRecDataset(args, seq_dic['user_seq'], data_type='session')
+    #     train_sampler = RandomSampler(train_dataset)
+    #     train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.batch_size)
 
-        eval_dataset = FMLPRecDataset(args, seq_dic['user_seq_eval'], test_neg_items=seq_dic['sample_seq_eval'], data_type='session')
-        eval_sampler = SequentialSampler(eval_dataset)
-        eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.batch_size)
+    #     eval_dataset = FMLPRecDataset(args, seq_dic['user_seq_eval'], test_neg_items=seq_dic['sample_seq_eval'], data_type='session')
+    #     eval_sampler = SequentialSampler(eval_dataset)
+    #     eval_dataloader = DataLoader(eval_dataset, sampler=eval_sampler, batch_size=args.batch_size)
 
-        test_dataset = FMLPRecDataset(args, seq_dic['user_seq_test'], test_neg_items=seq_dic['sample_seq_test'], data_type='session')
-        test_sampler = SequentialSampler(test_dataset)
-        test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=args.batch_size)
+    #     test_dataset = FMLPRecDataset(args, seq_dic['user_seq_test'], test_neg_items=seq_dic['sample_seq_test'], data_type='session')
+    #     test_sampler = SequentialSampler(test_dataset)
+    #     test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=args.batch_size)
     
     return train_dataloader, eval_dataloader, test_dataloader
