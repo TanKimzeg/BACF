@@ -31,7 +31,7 @@ def get_user_seqs_and_gene_sample(data_file,item_size):
 def neg_sample(item_set, item_size):  # 前闭后闭
     sample_list = []
     for _ in range(99):
-        item = random.random() * (item_size - 1)
+        item = random.randint(0, item_size - 1)
         sample_list.append(item)
     return sample_list
 
