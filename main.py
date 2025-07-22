@@ -81,6 +81,13 @@ def main():
                 filter_layer.FMLP(FMLP_args)
     
     classifier.LSTM(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.DT(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.KNN(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.LightGBM(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.LR(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.RF(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.SVM(classifier_args,labels=labels, dim=(dim_0, dim_1))
+    classifier.XGBoost(classifier_args,labels=labels, dim=(dim_0, dim_1))
 
 if __name__ == '__main__':
     main()
