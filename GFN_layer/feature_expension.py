@@ -10,7 +10,7 @@ from torch_geometric.data import Data
 
 class FeatureExpansion(MessagePassing):
     def __init__(self, ak:int) -> None:
-        super(FeatureExpansion, self).__init__('add')
+        super(FeatureExpansion, self).__init__('mean')
         self.ak = ak
         self.edge_norm_diag = 1e-8  # edge norm is used, and set A diag to it
 
