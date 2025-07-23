@@ -35,9 +35,10 @@ def main(args: Namespace, label: str) -> tuple[int, int]:
             file_path = os.path.join(output_dir, f"{i}{j}.txt")
             file_handler[(i,j)] = open(file_path, "w", encoding="utf-8")
     
+    total_graphs = 0
     for addr, graph_list in tqdm(tx_graphs.items(),
             desc="Saving GFN features", unit="addr", dynamic_ncols=True, leave=True):
-        tqdm.write(f"Saving address: {addr}, number of graphs: {len(graph_list)}") 
+        total_graphs += len(graph_list)
         stacked_graph = torch.stack(graph_list, dim=0)  # [batch_size, node_num, feature_dim]
         assert stacked_graph.size(1) == dim_0
         assert stacked_graph.size(2) == dim_1
@@ -45,6 +46,7 @@ def main(args: Namespace, label: str) -> tuple[int, int]:
             for j in range(dim_1):
                 feature_value = stacked_graph[:, i, j].tolist()
                 file_handler[(i,j)].write(" ".join(map(str, feature_value)) + "\n")
+    print(f"{total_graphs} graphs finished for {label}")
 
     for handler in file_handler.values():
         handler.close()

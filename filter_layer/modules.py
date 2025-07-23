@@ -180,3 +180,21 @@ class Encoder(nn.Module):
         if not output_all_encoded_layers:
             all_encoder_layers.append(hidden_states)
         return all_encoder_layers
+
+class Linear(nn.Module):
+    def __init__(self, hidden_size):
+        super(Linear, self).__init__()
+        self.hidden_size = hidden_size
+        self.linear = nn.Linear(in_features=1, out_features=hidden_size, bias=False)
+
+    def forward(self, input_tensor: torch.Tensor):
+        if input_tensor.ndim == 1:
+            return self.linear(input_tensor.unsqueeze(-1))
+        output_tensor = []
+        for i in range(input_tensor.shape[0]):
+            # 对每个时间步的输入进行线性变换
+            output = Linear(self.hidden_size)(input_tensor[i])  
+            output_tensor.append(output)
+        # 将输出张量堆叠成一个新的张量，形状为(batch_size, seq_len, hidden_size)
+        output_tensor = torch.stack(output_tensor, dim=0)
+        return output_tensor

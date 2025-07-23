@@ -53,20 +53,20 @@ class FMLPRecDataset(Dataset):
             test_samples = self.test_neg_items[index]
 
             cur_tensors = (
-                torch.tensor(index, dtype=torch.long),  # user_id for testing
-                torch.tensor(input_ids, dtype=torch.long),
+                torch.tensor(index, dtype=torch.float32),  # user_id for testing
+                torch.tensor(input_ids, dtype=torch.float32),
                 #torch.tensor(attribute, dtype=torch.long),
-                torch.tensor(answer, dtype=torch.long),
-                torch.tensor(neg_answer, dtype=torch.long),
-                torch.tensor(test_samples, dtype=torch.long),
+                torch.tensor(answer, dtype=torch.float32),
+                torch.tensor(neg_answer, dtype=torch.float32),
+                torch.tensor(test_samples, dtype=torch.float32),
             )
         else:
             cur_tensors = (
-                torch.tensor(index, dtype=torch.long),  # user_id for testing
-                torch.tensor(input_ids, dtype=torch.long),
+                torch.tensor(index, dtype=torch.float32),  # user_id for testing
+                torch.tensor(input_ids, dtype=torch.float32),
                 #torch.tensor(attribute, dtype=torch.long),
-                torch.tensor(answer, dtype=torch.long),
-                torch.tensor(neg_answer, dtype=torch.long),
+                torch.tensor(answer, dtype=torch.float32),
+                torch.tensor(neg_answer, dtype=torch.float32),
             )
 
         return cur_tensors

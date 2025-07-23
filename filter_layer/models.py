@@ -4,13 +4,14 @@
 
 import torch
 import torch.nn as nn
-from .modules import Encoder, LayerNorm
+from .modules import Encoder, LayerNorm, Linear
 
 class FMLPRecModel(nn.Module):
     def __init__(self, args):
         super(FMLPRecModel, self).__init__()
         self.args = args
-        self.item_embeddings = nn.Embedding(args.item_size, args.hidden_size, padding_idx=0)
+        # self.item_embeddings = nn.Embedding(args.item_size, args.hidden_size, padding_idx=0)
+        self.item_embeddings = Linear(args.hidden_size)
         self.position_embeddings = nn.Embedding(args.max_seq_length, args.hidden_size)
         self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(args.hidden_dropout_prob)
