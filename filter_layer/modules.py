@@ -182,10 +182,15 @@ class Encoder(nn.Module):
         return all_encoder_layers
 
 class Linear(nn.Module):
-    def __init__(self, hidden_size):
+    def __init__(self, hidden_size, cuda_condition: bool|None=None):
         super(Linear, self).__init__()
         self.hidden_size = hidden_size
-        self.linear = nn.Linear(in_features=1, out_features=hidden_size, bias=False)
+        self.cuda_condition = cuda_condition
+        self.device = torch.device('cuda' if cuda_condition else 'cpu')
+        self.linear = nn.Linear(in_features=1, 
+                                out_features=hidden_size, 
+                                bias=False, 
+                                device=self.device)
 
     def forward(self, input_tensor: torch.Tensor):
         if input_tensor.ndim == 1:
@@ -193,8 +198,8 @@ class Linear(nn.Module):
         output_tensor = []
         for i in range(input_tensor.shape[0]):
             # 对每个时间步的输入进行线性变换
-            output = Linear(self.hidden_size)(input_tensor[i])  
+            output = Linear(self.hidden_size, self.cuda_condition)(input_tensor[i])  
             output_tensor.append(output)
-        # 将输出张量堆叠成一个新的张量，形状为(batch_size, seq_len, hidden_size)
+        # 将输出张量堆叠成一个新的张量
         output_tensor = torch.stack(output_tensor, dim=0)
         return output_tensor

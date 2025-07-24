@@ -11,7 +11,7 @@ class FMLPRecModel(nn.Module):
         super(FMLPRecModel, self).__init__()
         self.args = args
         # self.item_embeddings = nn.Embedding(args.item_size, args.hidden_size, padding_idx=0)
-        self.item_embeddings = Linear(args.hidden_size)
+        self.item_embeddings = Linear(args.hidden_size, args.cuda_condition)
         self.position_embeddings = nn.Embedding(args.max_seq_length, args.hidden_size)
         self.LayerNorm = LayerNorm(args.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(args.hidden_dropout_prob)
