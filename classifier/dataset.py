@@ -68,10 +68,7 @@ def data_split(labels: list[str], data_root_path: str, test_size: float=0.2) -> 
     return (X_train_tensor, y_train_tensor, 
             X_test_tensor, y_test_tensor, X, y)
 
-def get_loaders(labels: list[str], data_root_path: str, batch_size: int=32) -> list[DataLoader]:
-    X_train_tensor, y_train_tensor, X_test_tensor, y_test_tensor, X, y = data_split(
-        labels=labels, data_root_path=data_root_path
-    )
+def get_loaders(X_train_tensor, y_train_tensor, X_test_tensor, y_test_tensor, X, y,batch_size: int=32) -> list[DataLoader]:
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
     eval_dataset = TensorDataset(X, y)

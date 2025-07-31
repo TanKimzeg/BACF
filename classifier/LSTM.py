@@ -112,15 +112,12 @@ def test(model: LSTMClassifier, test_loader) -> float:
     return avg_loss, accuracy
 
 
-def main(args, labels: list[str],dim: tuple[int, int]):
+def main(train_loader, test_loader, eval_loader, args, labels: list[str], dim: tuple[int, int]):
     hidden_dim = 128  # LSTM隐藏层维度
     num_layers = 2  # LSTM层数
     num_classes = len(labels)  # 类别数
 
     best_acc = 0.0  # 用于保存最佳准确率
-    train_loader, test_loader, eval_loader = get_loaders(
-         labels=labels, data_root_path=args.data_dir, batch_size=args.batch_size)
-
     model = LSTMClassifier(
         input_size=dim[0]*dim[1], hidden_size=hidden_dim, 
         num_layers=num_layers, num_classes=num_classes).to(device)

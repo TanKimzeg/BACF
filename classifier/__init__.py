@@ -1,11 +1,15 @@
-from .LR import main as LR
+from .LR import train as LR
 from .LSTM import main as LSTM
-from .KNN import main as KNN
-from .LightGBM import main as LightGBM
-from .XGBoost import main as XGBoost
-from .DT import main as DT
-from .SVM import main as SVM
-from .RF import main as RF
+from .KNN import train as KNN
+from .LightGBM import train as LightGBM
+from .XGBoost import train as XGBoost
+from .DT import train as DT
+from .SVM import train as SVM
+from .RF import train as RF
+from .hive_cote import train as hive_cote
+from .mlp import train as mlp
+from .main import main as classifier_main
+
 
 
 __all__ = [
@@ -16,5 +20,8 @@ __all__ = [
     'DT',
     'LightGBM',
     'SVM',
-    'RF'
+    'RF',
+    'hive_cote',
+    'mlp',
+    'classifier_main'
 ]

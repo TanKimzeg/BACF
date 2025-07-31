@@ -19,8 +19,9 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         joblib.dump(model, save_path)
 
+    print("Generating hive_cote classification report...")
     print(classification_report(y_test, y_pred))
-    print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print(f"hive-cote Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
 def main(args, labels: list[str]):
     from .dataset import data_split
