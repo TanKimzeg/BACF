@@ -43,7 +43,7 @@ def main(args, labels: list[str]):
     X_train, y_train, X_test, y_test, X, y = data_split(
         labels=labels, data_root_path=args.data_dir, test_size=0.2)
 
-    train(X_train, y_train, X, y, num_class=len(labels), 
+    train(X_train, y_train, X, y ,
           save_path=os.path.join(args.modelsave, 'lightgbm_model.pkl'))
     # gbm = LGBMClassifier(num_leaves=31, learning_rate=args.lr, n_estimators=20)
     # gbm.fit(X_train, y_train, eval_set=[(X_test, y_test)], eval_metric='logloss')

@@ -41,8 +41,8 @@ class LSTMClassifier(nn.Module):
     
     def forward(self, x):
         # 初始化隐藏状态和细胞状态
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32).to(device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32).to(device)
         
         # LSTM前向传播
         out, _ = self.lstm(x, (h0, c0))
@@ -66,7 +66,7 @@ def train(model: LSTMClassifier, train_loader, epoch: int, optimizer: optim.Opti
     # 模型训练
     model.train()
     for batch_idx, (batch_X, batch_y) in enumerate(train_loader):
-        batch_X = batch_X.to(device)
+        batch_X = batch_X.to(device).float()
         batch_y = batch_y.to(device)
 
         # 前向传播
@@ -92,7 +92,7 @@ def test(model: LSTMClassifier, test_loader) -> float:
         all_preds = []
         all_labels = []
         for batch_X, batch_y in test_loader:
-            batch_X = batch_X.to(device)
+            batch_X = batch_X.to(device).float()
             batch_y = batch_y.to(device)
 
             y_pred = model(batch_X)
@@ -108,7 +108,7 @@ def test(model: LSTMClassifier, test_loader) -> float:
     # 计算准确率
     accuracy = accuracy_score(all_labels.numpy(), all_preds.numpy())
     avg_loss = test_loss / len(test_loader)
-    tqdm.write(f'Test Loss: {test_loss/len(test_loader)}'f'Accuracy: {accuracy:.4f}')
+    tqdm.write(f'Test Loss: {test_loss/len(test_loader)}, Accuracy: {accuracy:.4f}')
     return avg_loss, accuracy
 
 
@@ -140,6 +140,7 @@ def main(args, labels: list[str],dim: tuple[int, int]):
 
         # 保存最佳模型
         if test_acc > best_acc:
+            best_acc = test_acc
             torch.save(model.state_dict(), os.path.join(args.modelsave, "lstm_model.pth"))
             tqdm.write(f"Model saved to {args.modelsave}/lstm_model.pth with accuracy: {test_acc:.4f}")
 
@@ -147,9 +148,9 @@ def main(args, labels: list[str],dim: tuple[int, int]):
 
     # 加载最佳模型
     model.load_state_dict(torch.load(os.path.join(args.modelsave, "lstm_model.pth")))
-    evaluate(model, eval_loader)
+    evaluate(model, eval_loader, labels)
 
-def evaluate(model: LSTMClassifier, eval_loader):
+def evaluate(model: LSTMClassifier, eval_loader, labels: list[str]):
     # 生成分类报告
     print('Generating classification report...')
     from sklearn.metrics import classification_report
@@ -158,14 +159,14 @@ def evaluate(model: LSTMClassifier, eval_loader):
     all_labels = []
     with torch.no_grad():
         for batch_X, batch_y in eval_loader:
-            batch_X = batch_X.to(device)
+            batch_X = batch_X.to(device).float()
             y_pred = model(batch_X)
             y_pred_classes = torch.argmax(y_pred, dim=1)
             all_preds.append(y_pred_classes.cpu())
             all_labels.append(batch_y.cpu())
     all_preds = torch.cat(all_preds)
     all_labels = torch.cat(all_labels)
-    print(classification_report(all_labels.numpy(), all_preds.numpy(), target_names=labels))
+    print(classification_report(all_labels.numpy(), all_preds.numpy(), target_names=labels, digits=4))
 
 if __name__ == "__main__":
     pass
