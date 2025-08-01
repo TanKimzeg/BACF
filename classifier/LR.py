@@ -21,7 +21,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert y_test.shape[0] == X_test.shape[0]
 
     # 初始化逻辑回归分类器
-    lr_model = LogisticRegression(max_iter=1000)
+    lr_model = LogisticRegression(max_iter=1000,n_jobs=-1)
 
     # 训练模型
     lr_model.fit(X_train, y_train)

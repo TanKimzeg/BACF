@@ -13,7 +13,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert X_train.ndim == 3
     assert X_train.shape[0] == y_train.shape[0]
 
-    model = mlp()
+    model = mlp(n_epochs=200, batch_size=64)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 

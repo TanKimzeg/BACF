@@ -12,7 +12,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     X_test = X_test.cpu().numpy() if isinstance(X_test, Tensor) else X_test
     y_test = y_test.cpu().numpy() if isinstance(y_test, Tensor) else y_test
 
-    knn = AeonKNN(distance="dtw")
+    knn = AeonKNN(distance="dtw",n_jobs=-1)
     knn.fit(X_train, y_train)
     y_pred = knn.predict(X_test)
 

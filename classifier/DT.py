@@ -22,7 +22,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert y_test.shape[0] == X_test.shape[0]
 
     # 初始化决策树分类器
-    dt_model = AeonDT(random_state=42)
+    dt_model = AeonDT(n_jobs=-1)
     
     # 训练模型
     dt_model.fit(X_train, y_train)

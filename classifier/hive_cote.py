@@ -11,7 +11,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     X_test = X_test.cpu().numpy() if isinstance(X_test, Tensor) else X_test
     y_test = y_test.cpu().numpy() if isinstance(y_test, Tensor) else y_test
 
-    model = HIVECOTEV2()
+    model = HIVECOTEV2(n_jobs=-1)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 

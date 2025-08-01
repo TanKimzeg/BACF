@@ -22,7 +22,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert y_test.shape[0] == X_test.shape[0]
     
     # 初始化LightGBM分类器
-    estimator = LGBMClassifier(num_leaves=31)
+    estimator = LGBMClassifier(num_leaves=31,n_jobs=-1)
     param_grid = {
         'learning_rate': [0.01, 0.1, 0.2],
         'n_estimators': [20, 40, 60],

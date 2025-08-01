@@ -23,7 +23,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert y_test.shape[0] == X_test.shape[0]
 
     # rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_classifier = AeonRF()
+    rf_classifier = AeonRF(n_jobs=-1)
     rf_classifier.fit(X_train, y_train)
     y_pred = rf_classifier.predict(X_test)
 
