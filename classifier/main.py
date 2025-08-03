@@ -11,22 +11,22 @@ def main(labels: list[str], classifier_args, dim: tuple[int, int]):
           batch_size=classifier_args.batch_size)
     LSTM(train_loader, test_loader, eval_loader,
          labels=labels,args=classifier_args, dim=dim)
-    DT(X_train, y_train, X, y,
+    DT(X_train, y_train, X_test, y_test,
        save_path=os.path.join(classifier_args.modelsave, 'dt_model.pkl'))
-    KNN(X_train, y_train, X, y,
+    KNN(X_train, y_train, X_test, y_test,
         save_path=os.path.join(classifier_args.modelsave, 'knn_model.pkl'))
-    LightGBM(X_train, y_train, X, y,
+    LightGBM(X_train, y_train, X_test, y_test,
              save_path=os.path.join(classifier_args.modelsave, 'lightgbm_model.pkl'))
-    LR(X_train, y_train, X, y,
+    LR(X_train, y_train, X_test, y_test,
        save_path=os.path.join(classifier_args.modelsave, 'lr_model.pkl'))
-    RF(X_train, y_train, X, y,
+    RF(X_train, y_train, X_test, y_test,
        save_path=os.path.join(classifier_args.modelsave, 'rf_model.pkl'))
-    SVM(X_train, y_train, X, y,
+    SVM(X_train, y_train, X_test, y_test,
         save_path=os.path.join(classifier_args.modelsave, 'svm_model.pkl'))
     XGBoost(X_train, y_train, X_test, y_test, num_class=len(labels),
             save_path=os.path.join(classifier_args.modelsave, 'xgboost_model.pkl'))
     hive_cote(X_train, y_train, X_test, y_test,
               save_path=os.path.join(classifier_args.modelsave, 'hive_cote_model.pkl'))
     mlp(X_train, y_train, X_test, y_test,
-                   save_path=os.path.join(classifier_args.modelsave, 'mlp_model.pkl'))
+            save_path=os.path.join(classifier_args.modelsave, 'mlp_model.pkl'))
     unpatch_sklearn()

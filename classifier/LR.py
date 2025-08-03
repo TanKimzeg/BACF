@@ -34,8 +34,6 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     y_pred = lr_model.predict(X_test)
 
     # 计算准确率
-    accuracy = (y_pred == y_test).mean()
-    print(f"Logistic Regression Test Accuracy: {accuracy:.4f}")
     print("Classification Report:")
     print(classification_report(y_test, y_pred))
     print(f"Logistic Regression Accuracy: {accuracy_score(y_test, y_pred):.4f}")

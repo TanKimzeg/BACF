@@ -17,12 +17,12 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    if save_path:
-        joblib.dump(model, save_path)
-
+    print("Generating MLP classification report...")
     print(classification_report(y_test, y_pred))
     print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
+    if save_path:
+        model.save_last_model_to_file(save_path)
 
 def main(args, labels: list[str]):
     from .dataset import data_split
