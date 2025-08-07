@@ -159,7 +159,7 @@ class FMLPRecTrainer(Trainer):
                 batch = tuple(t.to(self.device) for t in batch)
                 user_ids, input_ids, answers, _, sample_negs = batch
                 recommend_output = self.model(input_ids)
-                recommends.append(recommend_output[:, -1, :])
+                recommends.append(recommend_output[:, :, -1])
             recommends = torch.cat(recommends, dim=0)
             recommends = recommends.cpu().data.numpy().copy()
             with open(output, 'w') as f:
