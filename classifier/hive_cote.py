@@ -16,8 +16,8 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     y_pred = model.predict(X_test)
 
     print("Generating hive_cote classification report...")
-    print(classification_report(y_test, y_pred))
-    print(f"hive-cote Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print(classification_report(y_test, y_pred,digits=4))
+    print(f"hive-cote Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)

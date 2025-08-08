@@ -30,8 +30,8 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     # 保存模型
     if save_path:
         joblib.dump(rf_classifier, save_path)
-    print(classification_report(y_test, y_pred))
-    print(f"Random Forest Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print(classification_report(y_test, y_pred, digits=4))
+    print(f"Random Forest Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
 def main(args, labels: list[str]):
     from .dataset import data_split

@@ -34,7 +34,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
         joblib.dump(gbm, save_path)
     print("Generating classification report...")
     y_pred = gbm.predict(X_test)
-    print(classification_report(y_test, y_pred))
+    print(classification_report(y_test, y_pred, digits=4))
     print(f"LightGBM Test Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
 

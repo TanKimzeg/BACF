@@ -35,10 +35,8 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
 
     # 计算准确率
     accuracy = accuracy_score(y_test, y_pred)
+    print(classification_report(y_test, y_pred, digits=4))
     print(f"SVM Test Accuracy: {accuracy:.4f}")
-
-    # 打印分类报告
-    print(classification_report(y_test, y_pred))
 
 
 def main(args, labels: list[str]):

@@ -19,8 +19,8 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     if save_path:
         joblib.dump(knn, save_path)
 
-    print(classification_report(y_test, y_pred))
-    print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print(classification_report(y_test, y_pred, digits=4))
+    print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
 
 def main(args, labels: list[str]):

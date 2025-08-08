@@ -35,7 +35,7 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
 
     # 计算准确率
     print("Classification Report:")
-    print(classification_report(y_test, y_pred))
+    print(classification_report(y_test, y_pred, digits=4))
     print(f"Logistic Regression Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
 def main(args, labels: list[str]):

@@ -8,7 +8,7 @@ from .SVM import train as SVM
 from .RF import train as RF
 from .hive_cote import train as hive_cote
 from .mlp import train as mlp
-from .main import main as classifier_main
+from .main import combine_models
 
 
 
@@ -23,5 +23,5 @@ __all__ = [
     'RF',
     'hive_cote',
     'mlp',
-    'classifier_main'
+    'combine_models'
 ]

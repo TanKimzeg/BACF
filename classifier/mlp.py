@@ -13,13 +13,13 @@ def train(X_train: Tensor, y_train: Tensor, X_test: Tensor,
     assert X_train.ndim == 3
     assert X_train.shape[0] == y_train.shape[0]
 
-    model = mlp(n_epochs=200, batch_size=64)
+    model = mlp(n_layers=5,n_epochs=2000, batch_size=64)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
     print("Generating MLP classification report...")
-    print(classification_report(y_test, y_pred))
-    print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print(classification_report(y_test, y_pred,digits=4))
+    print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
 
     if save_path:
         model.save_last_model_to_file(save_path)

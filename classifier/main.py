@@ -3,7 +3,7 @@ from . import LSTM, DT, KNN, LightGBM, XGBoost, LR, SVM, RF, hive_cote, mlp
 from .dataset import get_loaders, data_split
 from sklearnex import patch_sklearn, unpatch_sklearn
 
-def main(labels: list[str], classifier_args, dim: tuple[int, int]):
+def combine_models(labels: list[str], classifier_args, dim: tuple[int, int]):
     patch_sklearn()
     X_train, y_train, X_test, y_test, X, y = data_split(
         labels=labels, data_root_path=classifier_args.data_dir, test_size=0.2)
